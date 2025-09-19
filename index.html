@@ -2,35 +2,47 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>douyuyqk.m3u</title>
+    <title>douyuyqk.m3u内容</title>
     <style>
-        /* 只保证内容和本地打开.m3u文件一样：等宽字体、保留换行 */
+        /* 完全模拟本地打开.m3u的效果：等宽字体、保留换行、白底黑字 */
         body {
             margin: 0;
-            padding: 10px;
-            font-family: 'Courier New', Courier, monospace; /* 本地打开.m3u常用的等宽字体 */
-            white-space: pre-wrap; /* 完全保留文件里的换行、空格，和原文件一致 */
-            background: #fff;
-            color: #000;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace; /* 本地记事本常用字体 */
+            white-space: pre-wrap; /* 关键：保留文件里的所有换行和空格 */
+            background: #ffffff;
+            color: #000000;
+            font-size: 14px;
+        }
+        /* 加载失败时的提示样式（仅备用） */
+        .error {
+            color: #ff0000;
         }
     </style>
 </head>
 <body>
-    <!-- 这里会显示.m3u的内容，初始是空的，JS加载后填充 -->
-    <div id="m3uContent"></div>
+    <!-- 内容会显示在这里 -->
+    <div id="content"></div>
 
     <script>
-        // 只做一件事：加载.m3u内容，显示出来，没任何多余逻辑
-        fetch('config.json')
-            .then(res => res.json()) // 读.m3u的地址
-            .then(config => fetch(config.m3uUrl)) // 用地址读.m3u文件
-            .then(m3uRes => m3uRes.text()) // 把.m3u当成纯文字读
-            .then(content => {
-                document.getElementById('m3uContent').textContent = content; // 把内容显示在页面上
+        // 1. 直接写死你的.m3u文件地址（不用再读其他配置文件）
+        const m3uUrl = "https://sub.ottiptv.cc/douyuyqk.m3u";
+        
+        // 2. 只做一件事：读取这个地址的内容，显示在页面上
+        fetch(m3uUrl)
+            .then(response => {
+                // 如果地址无效，直接提示错误
+                if (!response.ok) throw new Error("无法加载m3u文件（地址可能失效）");
+                return response.text(); // 把m3u文件当成纯文字读取
             })
-            .catch(() => {
-                // 万一加载失败，只显示简单提示，不搞复杂样式
-                document.getElementById('m3uContent').textContent = "加载失败，请检查.m3u文件地址是否有效";
+            .then(m3uContent => {
+                // 读取成功：把内容显示在页面上
+                document.getElementById("content").textContent = m3uContent;
+            })
+            .catch(error => {
+                // 读取失败：显示错误原因
+                document.getElementById("content").textContent = "加载失败：" + error.message;
+                document.getElementById("content").classList.add("error");
             });
     </script>
 </body>
