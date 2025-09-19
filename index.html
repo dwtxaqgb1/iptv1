@@ -1,75 +1,36 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>douyuyqk.m3u内容</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>douyuyqk.m3u</title>
     <style>
-        /* 让内容像记事本打开一样，有换行、等宽字体，方便复制 */
-        .m3u-text {
-            font-family: 'Courier New', 等宽字体;
-            white-space: pre-wrap; /* 保留文件里的换行/空格 */
-            background: #f8f8f8;
-            color: #333;
-            padding: 20px;
-            border-radius: 8px;
-            max-height: 700px;
-            overflow-y: auto; /* 内容多了能滚动 */
-            border: 1px solid #eee;
+        /* 只保证内容和本地打开.m3u文件一样：等宽字体、保留换行 */
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace; /* 本地打开.m3u常用的等宽字体 */
+            white-space: pre-wrap; /* 完全保留文件里的换行、空格，和原文件一致 */
+            background: #fff;
+            color: #000;
         }
     </style>
 </head>
-<body class="p-4 md:p-8 bg-gray-50">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">douyuyqk.m3u 文件内容</h1>
-        
-        <!-- 加载中提示 -->
-        <div id="loading" class="text-gray-600 mb-4">正在加载文件内容...</div>
-        
-        <!-- 错误提示（地址错了/文件打不开时显示） -->
-        <div id="error" class="text-red-500 bg-red-50 p-3 rounded mb-4 hidden"></div>
-        
-        <!-- 核心：显示.m3u内容的区域 -->
-        <div id="m3uContent" class="m3u-text hidden"></div>
-        
-        <!-- 辅助信息 -->
-        <div class="mt-4 text-sm text-gray-500">
-            关联的.m3u文件地址：<a href="https://sub.ottiptv.cc/douyuyqk.m3u" target="_blank" class="text-blue-500 underline">点击查看原文件</a><br>
-            最后更新检查时间：<span id="checkTime">-</span>
-        </div>
-    </div>
+<body>
+    <!-- 这里会显示.m3u的内容，初始是空的，JS加载后填充 -->
+    <div id="m3uContent"></div>
 
     <script>
-        // 只做一件事：读.m3u文件内容，显示在页面上，不跳转！
-        fetch('config.json') // 先读配置里的.m3u地址
-            .then(res => {
-                if (!res.ok) throw new Error('配置文件没找到');
-                return res.json();
+        // 只做一件事：加载.m3u内容，显示出来，没任何多余逻辑
+        fetch('config.json')
+            .then(res => res.json()) // 读.m3u的地址
+            .then(config => fetch(config.m3uUrl)) // 用地址读.m3u文件
+            .then(m3uRes => m3uRes.text()) // 把.m3u当成纯文字读
+            .then(content => {
+                document.getElementById('m3uContent').textContent = content; // 把内容显示在页面上
             })
-            .then(config => {
-                // 显示最后检查时间
-                document.getElementById('checkTime').textContent = config.lastCheckTime;
-                // 去读.m3u文件的文字内容
-                return fetch(config.m3uFileUrl);
-            })
-            .then(m3uRes => {
-                if (!m3uRes.ok) throw new Error('m3u文件打不开，可能地址失效了');
-                return m3uRes.text(); // 把.m3u文件当成纯文字读出来
-            })
-            .then(m3uContent => {
-                // 隐藏加载提示，显示内容
-                document.getElementById('loading').classList.add('hidden');
-                const contentBox = document.getElementById('m3uContent');
-                contentBox.textContent = m3uContent; // 把内容放到页面里
-                contentBox.classList.remove('hidden');
-            })
-            .catch(err => {
-                // 出错了就显示错误原因
-                document.getElementById('loading').classList.add('hidden');
-                const errorBox = document.getElementById('error');
-                errorBox.textContent = '加载失败：' + err.message;
-                errorBox.classList.remove('hidden');
+            .catch(() => {
+                // 万一加载失败，只显示简单提示，不搞复杂样式
+                document.getElementById('m3uContent').textContent = "加载失败，请检查.m3u文件地址是否有效";
             });
     </script>
 </body>
