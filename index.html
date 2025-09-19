@@ -2,47 +2,48 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>douyuyqk.m3u内容</title>
+    <title>douyuyqk.m3u</title>
     <style>
-        /* 完全模拟本地打开.m3u的效果：等宽字体、保留换行、白底黑字 */
-        body {
-            margin: 0;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace; /* 本地记事本常用字体 */
-            white-space: pre-wrap; /* 关键：保留文件里的所有换行和空格 */
-            background: #ffffff;
-            color: #000000;
-            font-size: 14px;
+        /* 完全重置网页默认样式，模拟纯文本文件效果 */
+        * {
+            margin: 0;    /* 去掉所有默认边距 */
+            padding: 0;   /* 去掉所有默认内边距 */
+            border: 0;    /* 去掉所有默认边框 */
         }
-        /* 加载失败时的提示样式（仅备用） */
+        body {
+            font-family: 'Courier New', Courier, monospace; /* 文本文件常用等宽字体 */
+            white-space: pre-wrap; /* 完全保留.m3u里的换行、空格，和原文件一致 */
+            font-size: 12px; /* 文本文件默认字号（可根据需求改，比如14px） */
+            color: #000;     /* 纯黑文本，和文本文件一致 */
+            background: #fff;/* 纯白背景，无任何底色 */
+            line-height: 1.2;/* 文本行高，接近文本文件显示效果 */
+        }
+        /* 加载失败时的文本提示（保持极简） */
         .error {
-            color: #ff0000;
+            color: #f00; /* 红色错误文本，不额外加样式 */
         }
     </style>
 </head>
 <body>
-    <!-- 内容会显示在这里 -->
     <div id="content"></div>
 
     <script>
-        // 1. 直接写死你的.m3u文件地址（不用再读其他配置文件）
+        // 你的.m3u文件地址（改地址时只动这里）
         const m3uUrl = "https://sub.ottiptv.cc/douyuyqk.m3u";
         
-        // 2. 只做一件事：读取这个地址的内容，显示在页面上
+        // 读取并显示内容（逻辑不变，只保核心功能）
         fetch(m3uUrl)
-            .then(response => {
-                // 如果地址无效，直接提示错误
-                if (!response.ok) throw new Error("无法加载m3u文件（地址可能失效）");
-                return response.text(); // 把m3u文件当成纯文字读取
+            .then(res => {
+                if (!res.ok) throw new Error("m3u文件加载失败，可能地址失效");
+                return res.text();
             })
-            .then(m3uContent => {
-                // 读取成功：把内容显示在页面上
-                document.getElementById("content").textContent = m3uContent;
+            .then(text => {
+                document.getElementById("content").textContent = text;
             })
-            .catch(error => {
-                // 读取失败：显示错误原因
-                document.getElementById("content").textContent = "加载失败：" + error.message;
-                document.getElementById("content").classList.add("error");
+            .catch(err => {
+                const contentEl = document.getElementById("content");
+                contentEl.textContent = err.message;
+                contentEl.classList.add("error");
             });
     </script>
 </body>
